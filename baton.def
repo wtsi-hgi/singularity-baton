@@ -24,11 +24,22 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
   cpanm JSON List::AllUtils
 
   # Download and install baton
-  curl -L https://github.com/wtsi-npg/baton/releases/download/1.2.0/baton-1.2.0.tar.gz | tar xz
-  cd baton-1.2.0
-  ./configure --with-irods
+  # curl -L https://github.com/wtsi-npg/baton/releases/download/1.2.0/baton-1.2.0.tar.gz | tar xz
+  # cd baton-1.2.0
+  # ./configure --with-irods
   # make
   # make install
+
+  # FIXME Use Keith's development branch for iRODS 4.2+ compatibility
+  # TODO Revert to the above once this has been merged into trunk
+  apt install -y git autoconf
+  git clone --single-branch --branch irods-4.2.x https://github.com/kjsanger/baton.git
+  cd baton
+  autoreconf -i
+  ./configure
+  make
+  make install
+  echo "/usr/local/lib" > /etc/ld.so.conf.d/baton.conf
 
   # TODO Clean up?
 
@@ -52,6 +63,9 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
 
 %apprun metaquery
   exec baton-metaquery "$@"
+
+%apprun specificquery
+  exec baton-specificquery "$@"
 
 %apprun do
   exec baton-do "$@"
