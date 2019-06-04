@@ -20,7 +20,7 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
 
   # Install iRODS development headers, runtime and Kerberos plugin,
   # as well as all other dependencies
-  apt install -y irods-dev irods-runtime irods-auth-plugin-krb libboost-all-dev cpanminus
+  apt install -y irods-dev irods-runtime irods-auth-plugin-krb libboost-all-dev cpanminus perl-doc
   cpanm JSON List::AllUtils
 
   # Download and install baton
@@ -39,7 +39,11 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
   ./configure
   make
   make install
+
+  # Update library cache
+  # FIXME Install libs into a standard location
   echo "/usr/local/lib" > /etc/ld.so.conf.d/baton.conf
+  ldconfig
 
   # TODO Clean up?
 

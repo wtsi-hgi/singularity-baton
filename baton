@@ -51,6 +51,7 @@ fi
 to_mount() {
   (
     # iRODS environment configuration
+    # FIXME Does this need to be bound to the container's HOME?
     echo "${IRODS_ENVIRONMENT_FILE}"
 
     # iRODS configuration dependencies
