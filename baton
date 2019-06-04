@@ -101,6 +101,7 @@ main() {
     this="$1"
 
     # Look for --file arguments to add to the list of mounts
+    # FIXME What happens if file is "-" (i.e., stdin) or a FIFO, etc.?
     if [[ "${last}" == "--file" ]]; then
       this="$(readlink -f "${this}")"
       mounts="${mounts},${this}"
