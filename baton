@@ -49,6 +49,14 @@ if ! [[ -e "${IRODS_ENVIRONMENT_FILE}" ]]; then
 fi
 
 to_mount() {
+  exists() {
+    local path
+
+    while read -r path; do
+      [[ -e "${path}" ]] && echo "${path}"
+    done
+  }
+
   (
     # iRODS environment configuration
     echo "${IRODS_ENVIRONMENT_FILE}"
@@ -67,6 +75,7 @@ to_mount() {
   ) \
   | sort \
   | uniq \
+  | exists \
   | paste -sd,
 }
 
