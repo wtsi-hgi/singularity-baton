@@ -8,7 +8,7 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
 
 %labels
   Maintainer  Christopher Harrison <ch12@sanger.ac.uk>
-  Baton       1.2.0
+  baton       1.2.0
   iRODS       4.2.5
 
 %post
@@ -23,7 +23,7 @@ Include: apt-transport-https build-essential pkg-config curl ca-certificates lib
   apt install -y irods-dev irods-runtime irods-auth-plugin-krb libboost-all-dev cpanminus
   cpanm JSON List::AllUtils
 
-  # Download and install Baton
+  # Download and install baton
   curl -L https://github.com/wtsi-npg/baton/releases/download/1.2.0/baton-1.2.0.tar.gz | tar xz
   cd baton-1.2.0
   ./configure --with-irods

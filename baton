@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Singularity containerised Baton wrapper script
+# Singularity containerised baton wrapper script
 # Christopher Harrison <ch12@sanger.ac.uk>
 
 set -euo pipefail
@@ -33,11 +33,11 @@ declare IMAGE_EXT="simg"
 
 declare IMAGE
 if ! IMAGE="$(command -v "baton.${IMAGE_EXT}")"; then
-  stderr "Baton image not found in PATH; checking for local copy..."
+  stderr "baton image not found in PATH; checking for local copy..."
 
   IMAGE="${WORK_DIR}/baton.${IMAGE_EXT}"
   if ! [[ -e "${IMAGE}" ]]; then
-    stderr "Local Baton image not found; building..."
+    stderr "Local baton image not found; building..."
     "${SINGULARITY}" build "${IMAGE}" "${WORK_DIR}/baton.def"
   fi
 fi
