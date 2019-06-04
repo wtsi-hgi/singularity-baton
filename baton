@@ -84,25 +84,36 @@ to_mount() {
 main() {
   local app="${1-}"
   local mounts="$(to_mount)"
+
   local -a run_args=("--containall")
+  local -a img_args
 
   if grep -qx -- "${app}" <("${SINGULARITY}" apps "${IMAGE}"); then
       # The first argument corresponds to an app within the image
       run_args+=("--app" "${app}")
       shift
-
-      # Look for --file arguments to add to the list of mounts
-      local this
-      local last="foo"
-      for this in "$@"; do
-        [[ "${last}" == "--file" ]] && mounts="${mounts},$(readlink -f "${this}")"
-        last="${this}"
-      done
   fi
 
-  # Add bind mounts and run
+  # Transpose baton arguments
+  local this
+  local last="foo"
+  while (( $# )); do
+    this="$1"
+
+    # Look for --file arguments to add to the list of mounts
+    if [[ "${last}" == "--file" ]]; then
+      this="$(readlink -f "${this}")"
+      mounts="${mounts},${this}"
+    fi
+
+    img_args+=("${this}")
+    last="${this}"
+    shift
+  done
+
+  # Add bind mounts into runtime arguments and launch
   run_args+=("--bind" "${mounts}")
-  "${SINGULARITY}" run "${run_args[@]}" "${IMAGE}" "$@"
+  "${SINGULARITY}" run "${run_args[@]}" "${IMAGE}" "${img_args[@]+"${img_args[@]}"}"
 }
 
 main "$@"
