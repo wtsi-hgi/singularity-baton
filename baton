@@ -78,7 +78,7 @@ main() {
   local mounts="$(to_mount)"
   local -a run_args=("--containall")
 
-  if ( "${SINGULARITY}" apps "${IMAGE}" | grep -qx "${app}" ); then
+  if ( "${SINGULARITY}" apps "${IMAGE}" | grep -qx -- "${app}" ); then
       # The first argument corresponds to an app within the image
       run_args+=("--app" "${app}")
       shift
