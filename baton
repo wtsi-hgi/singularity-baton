@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Singularity containerised Baton wrapper script
+# Christopher Harrison <ch12@sanger.ac.uk>
+
 set -euo pipefail
 
 stderr() {
@@ -63,5 +66,35 @@ to_mount() {
     fi
   ) \
   | sort \
-  | uniq
+  | uniq \
+  | paste -sd,
 }
+
+## Entrypoint
+
+main() {
+  local app="${1-}"
+  local mounts="$(to_mount)"
+  local -a run_args=("--containall")
+
+  if ( "${SINGULARITY}" apps "${IMAGE}" | grep -qx "${app}" ); then
+      # The first argument corresponds to an app within the image
+      run_args+=("--app" "${app}")
+      shift
+
+      # Look for --file arguments to add to the list of mounts
+      local this
+      local last="foo"
+      for this in "$@"; do
+        [[ "${last}" == "--file" ]] && mounts="${mounts},${this}"
+        last="${this}"
+      done
+  fi
+
+  # Add bind mounts
+  run_args+=("--bind" "${mounts}")
+
+  "${SINGULARITY}" run "${run_args[@]}" "${IMAGE}" "$@"
+}
+
+main "$@"
