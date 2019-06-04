@@ -3,7 +3,7 @@
 A Singularity container and wrapper script for
 [baton](wtsi-npg.github.io/baton).
 
-# Usage
+## Usage
 
 The Singularity image can be built from the [recipe file](baton.def) and
 placed somewhere in your `PATH` or alongside the wrapper script. (Note
