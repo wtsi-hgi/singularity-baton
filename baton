@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+stderr() {
+  local message="$*"
+
+  [[ -t 2 ]] && message="$(tput setaf 1)${message}$(tput sgr0)"
+  >&2 echo "${message}"
+}
+
+## Bootstrap
+
+declare WORK_DIR="$(dirname "$(readlink -f "$0")")"
+
+declare SINGULARITY
+if ! SINGULARITY="$(command -v singularity)"; then
+  stderr "Singularity not found!"
+  exit 1
+fi
+
+declare JQ
+if ! JQ="$(command -v jq)"; then
+  stderr "jq not found!"
+  exit 1
+fi
+
+declare IMAGE_EXT="simg"
+[[ "$("${SINGULARITY}" --version)" =~ ^3\. ]] && IMAGE_EXT="sif"
+
+declare IMAGE
+if ! IMAGE="$(command -v "baton.${IMAGE_EXT}")"; then
+  stderr "Baton image not found in PATH; checking for local copy..."
+
+  IMAGE="${WORK_DIR}/baton.${IMAGE_EXT}"
+  if ! [[ -e "${IMAGE}" ]]; then
+    stderr "Local Baton image not found; building..."
+    "${SINGULARITY}" build "${IMAGE}" "${WORK_DIR}/baton.def"
+  fi
+fi
+
+declare IRODS_ENVIRONMENT_FILE="${IRODS_ENVIRONMENT_FILE-${HOME}/.irods/irods_environment.json}"
+if ! [[ -e "${IRODS_ENVIRONMENT_FILE}" ]]; then
+  stderr "iRODS environment configuration not found!"
+  exit 1
+fi
+
+to_mount() {
+  (
+    # iRODS environment configuration
+    echo "${IRODS_ENVIRONMENT_FILE}"
+
+    # iRODS configuration dependencies
+    "${JQ}" -r --argjson keys '[
+      "irods_authentication_file",
+      "irods_ssl_ca_certificate_file",
+      "irods_plugin_home"
+    ]' 'to_entries | map(select(.key == $keys[])) | .[].value' "${IRODS_ENVIRONMENT_FILE}"
+
+    # Kerberos configuration, if required
+    if [[ "$("${JQ}" -r '.irods_authentication_scheme == "KRB"' "${IRODS_ENVIRONMENT_FILE}")" == "true" ]]; then
+      echo "/etc/krb5.conf"
+    fi
+  ) \
+  | sort \
+  | uniq
+}
