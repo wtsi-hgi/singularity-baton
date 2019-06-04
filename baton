@@ -95,7 +95,7 @@ main() {
       local this
       local last="foo"
       for this in "$@"; do
-        [[ "${last}" == "--file" ]] && mounts="${mounts},${this}"
+        [[ "${last}" == "--file" ]] && mounts="${mounts},$(readlink -f "${this}")"
         last="${this}"
       done
   fi
