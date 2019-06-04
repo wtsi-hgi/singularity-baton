@@ -1,0 +1,57 @@
+Bootstrap: debootstrap
+OSVersion: xenial
+MirrorURL: http://archive.ubuntu.com/ubuntu
+Include: apt-transport-https build-essential pkg-config curl ca-certificates libssl-dev libgssapi-krb5-2 libjansson-dev
+
+%help
+  Client programs and API for use with iRODS.
+
+%labels
+  Maintainer  Christopher Harrison <ch12@sanger.ac.uk>
+  Baton       1.2.0
+  iRODS       4.2.5
+
+%post
+  # Enable Universe and add iRODS package repositories
+  echo "deb http://archive.ubuntu.com/ubuntu xenial main universe" > /etc/apt/sources.list
+  echo "deb https://packages.irods.org/apt/ xenial main" > /etc/apt/sources.list.d/renci-irods.list
+  curl https://packages.irods.org/irods-signing-key.asc | apt-key add -
+  apt update
+
+  # Install iRODS development headers, runtime and Kerberos plugin,
+  # as well as all other dependencies
+  apt install -y irods-dev irods-runtime irods-auth-plugin-krb libboost-all-dev cpanminus
+  cpanm JSON List::AllUtils
+
+  # Download and install Baton
+  curl -L https://github.com/wtsi-npg/baton/releases/download/1.2.0/baton-1.2.0.tar.gz | tar xz
+  cd baton-1.2.0
+  ./configure --with-irods
+  # make
+  # make install
+
+  # TODO Clean up?
+
+%runscript
+  exec baton "$@"
+
+%apprun chmod
+  exec baton-chmod "$@"
+
+%apprun get
+  exec baton-get "$@"
+
+%apprun put
+  exec baton-put "$@"
+
+%apprun list
+  exec baton-list "$@"
+
+%apprun metamod
+  exec baton-metamod "$@"
+
+%apprun metaquery
+  exec baton-metaquery "$@"
+
+%apprun do
+  exec baton-do "$@"
