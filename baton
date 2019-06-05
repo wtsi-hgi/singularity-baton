@@ -14,7 +14,13 @@ stderr() {
 
 ## Bootstrap
 
-declare WORK_DIR="$(dirname "$(readlink -f "$0")")"
+declare BINARY="$(basename "$0")"
+declare WORK_DIR="$(dirname "$(readlink -f "${BINARY}")")"
+
+if [[ "${BINARY}" =~ ^baton- ]]; then
+  declare SUBCOMMAND="${BINARY#*-}"
+  exec "${WORK_DIR}/baton" "${SUBCOMMAND}" "$@"
+fi
 
 declare SINGULARITY
 if ! SINGULARITY="$(command -v singularity)"; then
@@ -69,6 +75,7 @@ to_mount() {
     ]' 'to_entries | map(select(.key == $keys[])) | .[].value' "${IRODS_ENVIRONMENT_FILE}"
 
     # Kerberos configuration, if required
+    # TODO Untested
     if [[ "$("${JQ}" -r '.irods_authentication_scheme == "KRB"' "${IRODS_ENVIRONMENT_FILE}")" == "true" ]]; then
       echo "/etc/krb5.conf"
     fi

@@ -25,3 +25,7 @@ can be used through the wrapper script as subcommands. For example:
 ...should be rewritten as:
 
     baton -c "/my/collection" | baton metaquery --obj
+
+However, for convenience -- and so you won't need to change any of your
+scripts -- the wrapper script also handles the hyphenated-style suite of
+programs, with appropriate symlinks provided.
